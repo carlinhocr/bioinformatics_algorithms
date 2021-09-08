@@ -64,6 +64,16 @@ class Bioinformatics(object):
                 skew.append(skew[i])
         return skew
 
+    def MinimumSkew(self,Genome):
+        positions =[]
+        skew = self.skewArray(Genome)
+        min_skew = min(skew)
+        print (min_skew)
+        for i in range (0,len(skew)):
+            if skew[i] == min_skew:
+                positions.append(i)
+        return positions
+
 def main():
 
     bio = Bioinformatics()
@@ -73,8 +83,10 @@ def main():
     symbol = "A"
     # print(bio.SymbolArray(genome,symbol))
     # print(bio.FasterSymbolArray(genome,symbol))
-    Genome = "CATGGGCATCGGCCATACGCC"
-    print(bio.skewArray(Genome))
+    # Genome = "CATGGGCATCGGCCATACGCC"
+    # print(bio.skewArray(Genome))
+    Genome = "TAAAGACTGCCGAGAGGCCAACACGAGTGCTAGAACGAGGGGCGTAAACGCGGGTCCGAT"
+    print(bio.MinimumSkew(Genome))
 
 if __name__ == "__main__":
     main()
