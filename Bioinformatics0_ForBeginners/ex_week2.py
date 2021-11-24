@@ -74,6 +74,36 @@ class Bioinformatics(object):
                 positions.append(i)
         return positions
 
+    def hammingDistance(self,p,q):
+        if len(p) >= len(q):
+            mayor = p
+            menor = q
+        else:
+            mayor = q
+            menor = p
+        count = 0
+        for i in range (0,len(menor)):
+            if p[i] != q[i]:
+                count += 1
+        count += len(mayor)-len(menor)
+        return count
+
+    def approximatePatternMatching(self, genome, pattern, d):
+        positions = []  # output variable
+        for i in range(0, (len(genome) - len(pattern)) + 1):
+            subtext = genome[i:len(pattern) + i]
+            if self.hammingDistance(subtext,pattern) <=d:
+                positions.append(i)
+        return positions
+
+    def approximatePatternCount(self, text, pattern,d):
+        count = 0
+        for i in range(0,(len(text)-len(pattern))+1):
+            subtext = text[i:len(pattern)+i]
+            if self.hammingDistance(subtext,pattern) <=d:
+                count +=1
+        return count
+
 def main():
 
     bio = Bioinformatics()
@@ -85,8 +115,24 @@ def main():
     # print(bio.FasterSymbolArray(genome,symbol))
     # Genome = "CATGGGCATCGGCCATACGCC"
     # print(bio.skewArray(Genome))
-    Genome = "TAAAGACTGCCGAGAGGCCAACACGAGTGCTAGAACGAGGGGCGTAAACGCGGGTCCGAT"
-    print(bio.MinimumSkew(Genome))
+    # Genome = "TAAAGACTGCCGAGAGGCCAACACGAGTGCTAGAACGAGGGGCGTAAACGCGGGTCCGAT"
+    # Genome = "GATACACTTCCCGAGTAGGTACTG"
+    # print(bio.MinimumSkew(Genome))
+    string1 = "CAGAAAGGAAGGTCCCCATACACCGACGCACCAGTTTA"
+    string2 = "CACGCCGTATGCATAAACGAGCCGCACGAACCAGAGAG"
+    print(bio.hammingDistance(string1,string2))
+    # pattern ="ATTCTGGA"
+    # genome="CGCCCGAATCCAGAACGCATTCCCATATTTCGGGACCACTGGCCTCCACGGTACGGACGTCAATCAAAT"
+    # d=3
+    # print(bio.approximatePatternMatching(genome,pattern,d))
+    # pattern ="GAGG"
+    # genome="TTTAGAGCCTTCAGAGG"
+    # d=2
+    # print(bio.approximatePatternCount(genome,pattern,d))
+    a=list(range(5))
+    b=a
+    a[2]=12
+    print (b)
 
 if __name__ == "__main__":
     main()
