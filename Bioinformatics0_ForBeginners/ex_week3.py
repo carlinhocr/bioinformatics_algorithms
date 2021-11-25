@@ -41,6 +41,36 @@ class Bioinformatics(object):
             #print(entropyColumn)
         return -1*entropyColumn
 
+    def count(self,motifs):
+        k = len(motifs[0])
+        count = {}
+        for symbol in "ACGT":
+            count[symbol]=[]
+            for j in range(k):
+                count[symbol].append(0)
+        t = len(motifs)
+        for i in range(t):
+            for j in range(k):
+                symbol = motifs[i][j]
+                count[symbol][j] +=1
+        return count
+
+    def profile(self,motifs):
+        countMatrix = self.count(motifs)
+        profileMatrix = {}
+        k = len(motifs[0]) # number of columns
+        t = len(motifs) # number of rows
+        for symbol in "ACGT":
+            profileMatrix[symbol]=[]
+            for j in range(k):
+                profileMatrix[symbol].append(0)
+        for symbol in "ACGT":
+            for j in range(k):
+                profileMatrix[symbol][j]=countMatrix[symbol][j]/t
+        return profileMatrix
+
+
+
 def main():
 
     bio = Bioinformatics()
@@ -52,6 +82,9 @@ def main():
     ]
     column = [0.2, 0.6, 0.0, 0.2]
     #print (bio.entropyCalcColumn(column))
-    print (bio.entropyCalc(profile_matrix))
+    #print (bio.entropyCalc(profile_matrix))
+    motifs = ["AACGTA","CCCGTT","CACCTT","GGATTA","TTCCGG"]
+    print (bio.count(motifs))
+    print (bio.profile(motifs))
 if __name__ == "__main__":
     main()
