@@ -7,163 +7,6 @@ class Bioinformatics(object):
     def __init__(self):
         pass
 
-    def findAminoAcidFromCodon(self,codons):
-        codon_full = {
-            'UUU': 'Phe',
-            'UUC': 'Phe',
-            'uua': 'Leu',
-            'UUG': 'Leu',
-            'CUU': 'Leu',
-            'CUC': 'Leu',
-            'CUA': 'Leu',
-            'CUG': 'Leu',
-            'AUU': 'Ile',
-            'AUC': 'Ile',
-            'AUA': 'Ile',
-            'AUG': 'Met',
-            'GUU': 'Val',
-            'GUC': 'Val',
-            'GUA': 'Val',
-            'GUG': 'Val',
-            'UCU': 'Ser',
-            'UCC': 'Ser',
-            'UCA': 'Ser',
-            'UCG': 'Ser',
-            'CCU': 'Pro',
-            'CCC': 'Pro',
-            'CCA': 'Pro',
-            'CCG': 'Pro',
-            'ACU': 'Thr',
-            'ACC': 'Thr',
-            'ACA': 'Thr',
-            'ACG': 'Thr',
-            'GCU': 'Ala',
-            'GCC': 'Ala',
-            'GCA': 'Ala',
-            'GCG': 'Ala',
-            'UAU': 'Tyr',
-            'UAC': 'Tyr',
-            'UAA': 'STOP',
-            'UAG': 'STOP',
-            'CAU': 'His',
-            'CAC': 'His',
-            'CAA': 'Gln',
-            'CAG': 'Gln',
-            'AAU': 'Asn',
-            'AAC': 'Asn',
-            'AAA': 'Lys',
-            'AAG': 'Lys',
-            'GAU': 'Asp',
-            'GAC': 'Asp',
-            'GAA': 'Glu',
-            'GAG': 'Glu',
-            'UGU': 'Cys',
-            'UGC': 'Cys',
-            'UGA': 'STOP',
-            'UGG': 'Trp',
-            'CGU': 'Arg',
-            'CGC': 'Arg',
-            'CGA': 'Arg',
-            'CGG': 'Arg',
-            'AGU': 'Ser',
-            'AGC': 'Ser',
-            'AGA': 'Arg',
-            'AGG': 'Arg',
-            'GGU': 'Gly',
-            'GGC': 'Gly',
-            'GGA': 'Gly',
-            'GGG': 'Gly'
-        }
-        codon_three_to_one = {
-            "Lys" : "K",
-            "Asn" : "N",
-            "Thr" : "T",
-            "Ser" : "S",
-            "Ile" : "I",
-            "Gln" : "Q",
-            "Met" : "M",
-            "His" : "H",
-            "Pro" : "P",
-            "Arg" : "R",
-            "Leu" : "L",
-            "Glu" : "E",
-            "Asp" : "D",
-            "Ala" : "A",
-            "Gly" : "G",
-            "Val" : "V",
-            "Stp" : "O",
-            "Tyr" : "Y",
-            "Cys" : "C",
-            "Trp" : "W",
-            "Phe" : "F"
-        }
-        aminoAcid = ""
-        for i in range(0,len(codons),3):
-            actualCodon = codons[i:i+3]
-            aminoAcid += codon_three_to_one [codon_full[codons[i:i+3]]]
-        return aminoAcid
-
-    def entropyCalc2(self,profile):
-        entropy_matrix = 0.0
-        for i in profile:
-            print (i)
-            entropy_matrix += self.entropyCalcColumn(i)
-            print (entropy_matrix)
-        return (entropy_matrix)
-
-
-    def entropyCalc(self,profile):
-        entropy_matrix = 0.0
-        for i in profile:
-            for element in i:
-                if element != 0:
-                    entropy_matrix += element*math.log(element, 2)
-            print (entropy_matrix)
-        return (-1*entropy_matrix)
-
-    def entropyCalcColumn(self, column):
-        entropyColumn = 0
-        for element in column:
-            if element != 0:
-                entropyColumn += element*math.log(element, 2)
-        return -1*entropyColumn
-
-    def entropyCalcColumn_old(self, column):
-        entropyColumn = 0
-        for i in range(0, len(column)):
-            element = column[i]
-            if element != 0:
-                entropyColumn += element*math.log(element, 2)
-        return -1*entropyColumn
-
-    def count(self,motifs):
-        k = len(motifs[0])
-        count = {}
-        for symbol in "ACGT":
-            count[symbol]=[]
-            for j in range(k):
-                count[symbol].append(0)
-        t = len(motifs)
-        for i in range(t):
-            for j in range(k):
-                symbol = motifs[i][j]
-                count[symbol][j] +=1
-        return count
-
-    def profile(self,motifs):
-        countMatrix = self.count(motifs)
-        profileMatrix = {}
-        k = len(motifs[0]) # number of columns
-        t = len(motifs) # number of rows
-        for symbol in "ACGT":
-            profileMatrix[symbol]=[]
-            for j in range(k):
-                profileMatrix[symbol].append(0)
-        for symbol in "ACGT":
-            for j in range(k):
-                profileMatrix[symbol][j]=countMatrix[symbol][j]/t
-        return profileMatrix
-
     def countWithPseudocounts(self,motifs):
         k = len(motifs[0])
         count = {}
@@ -183,13 +26,17 @@ class Bioinformatics(object):
         profileMatrix = {}
         k = len(motifs[0]) # number of columns
         t = len(motifs) # number of rows
+        print(k)
+        print(t)
+        totatDivCount = 0 # laPlace
         for symbol in "ACGT":
+            totatDivCount += countMatrix[symbol][0]
             profileMatrix[symbol]=[]
             for j in range(k):
                 profileMatrix[symbol].append(0)
         for symbol in "ACGT":
             for j in range(k):
-                profileMatrix[symbol][j]=countMatrix[symbol][j]/(t+4)
+                profileMatrix[symbol][j]=countMatrix[symbol][j]/totatDivCount
         return profileMatrix
 
     def consensus(self,motifs):
