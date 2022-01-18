@@ -104,6 +104,7 @@ class Bioinformatics(object):
                 count +=1
         return count
 
+
 def main():
 
     bio = Bioinformatics()
