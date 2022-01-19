@@ -190,9 +190,48 @@ class Bioinformatics(object):
             kmer = Text[i:i+k]
             probabilities[kmer] = self.kmerProb(kmer,profile)
         probabilities_normalized = self.normalize(probabilities)
-        probabilities_weighted = self.weightedDie(probabilities_normalized)
-        return probabilities_weighted
+        string_probabilities_weighted = self.weightedDie(probabilities_normalized)
+        return string_probabilities_weighted
 
+    def cloning(self, li1):
+        li_copy = li1[:]
+        return li_copy
+
+    # GibbsSampler(Dna, k, t, N)
+    #     randomly select k-mers Motifs = (Motif1, …, Motift) in each string from Dna
+    #     BestMotifs ← Motifs
+    #     for j ← 1 to N
+    #         i ← randomly generated integer between 1 and t
+    #         Profile ← profile matrix formed from all strings in Motifs except for Motifi
+    #         Motifi ← Profile-randomly generated k-mer in the i-th string
+    #         if Score(Motifs) < Score(BestMotifs)
+    #             BestMotifs ← Motifs
+    #     return BestMotifs
+
+    def gibbsSampler(self,dna, k, t, N):
+        bestMotifs = []
+        motifs = self.randomMotifs(dna,k,t)
+        bestMotifs = motifs
+        for j in range(1, N):
+            i = random.randint(0, t-1)
+            print (i)
+            print (motifs)
+            motifs_without_i= self.cloning(motifs)
+            motifs_selected = motifs[i]
+            motifs_without_i.pop(i)
+            profile = self.profileWithPseudocounts(motifs_without_i)
+            dna_i = dna[i]
+            kmer_profile_weighted = self.profileGeneratedString(dna_i,profile,k)
+            print(dna_i)
+            print(profile)
+            print(kmer_profile_weighted)
+            print(motifs_selected)
+            motifs.pop(i) # it is more clear to use an auxliary list motifs_without_i for debugging
+            motifs.insert(i, kmer_profile_weighted)
+            print(motifs)
+            if self.score(motifs) < self.score(bestMotifs):
+                bestMotifs = motifs
+        return bestMotifs
 
 
 def main():
@@ -202,10 +241,10 @@ def main():
     # print(bio.normalize(probabilites))
     # probabilites = {'A': 0.25, 'C': 0.25, 'G': 0.25, 'T': 0.25}
     # print(bio.weightedDie(probabilites))
-    k = 2
-    Text = 'AAACCCAAACCC'
-    profile = {'A': [0.5, 0.1], 'C': [0.3, 0.2], 'G': [0.2, 0.4], 'T': [0.0, 0.3]}
-    print(bio.profileGeneratedString(Text,profile,k))
+    # k = 2
+    # Text = 'AAACCCAAACCC'
+    # profile = {'A': [0.5, 0.1], 'C': [0.3, 0.2], 'G': [0.2, 0.4], 'T': [0.0, 0.3]}
+    # print(bio.profileGeneratedString(Text,profile,k))
     # profile_matrix = [
     #     [0.2, 0.2, 0.0, 0.0, 0.0, 0.0, 0.9, 0.1, 0.1, 0.1, 0.3, 0.0],
     #     [0.1, 0.6, 0.0, 0.0, 0.0, 0.0, 0.0, 0.4, 0.1, 0.2, 0.4, 0.6],
@@ -299,10 +338,12 @@ def main():
     # k = 3
     # t = 5
     # print(bio.randomMotifs(dna,k,t))
-    # dna = ['CGCCCCTCTCGGGGGTGTTCAGTAAACGGCCA', 'GGGCGAGGTATGTGTAAGTGCCAAGGTGCCAG', 'TAGTACCGAGACCGAAAGAAGTATACAGGCGT',
-    #        'TAGATCAAGTTTCAGGTGCACGTCGGTGAACC', 'AATCCACCAGCTCCACGTGCAATGTTGGCCTA']
-    # k = 8
-    # t = 5
+    dna = ['CGCCCCTCTCGGGGGTGTTCAGTAAACGGCCA', 'GGGCGAGGTATGTGTAAGTGCCAAGGTGCCAG', 'TAGTACCGAGACCGAAAGAAGTATACAGGCGT',
+           'TAGATCAAGTTTCAGGTGCACGTCGGTGAACC', 'AATCCACCAGCTCCACGTGCAATGTTGGCCTA']
+    k = 8
+    t = 5
+    n = 100
+    print(bio.gibbsSampler(dna,k,t,n))
     # print(bio.randomizedMotifSearchNtimes(dna,k,t,100))
 
 if __name__ == "__main__":
