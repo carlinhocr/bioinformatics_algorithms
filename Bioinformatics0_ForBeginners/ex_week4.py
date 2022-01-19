@@ -8,20 +8,6 @@ class Bioinformatics(object):
     def __init__(self):
         pass
 
-    def count(self,motifs):
-        k = len(motifs[0])
-        count = {}
-        for symbol in "ACGT":
-            count[symbol]=[]
-            for j in range(k):
-                count[symbol].append(0)
-        t = len(motifs)
-        for i in range(t):
-            for j in range(k):
-                symbol = motifs[i][j]
-                count[symbol][j] +=1
-        return count
-
     def countWithPseudocounts(self,motifs):
         k = len(motifs[0])
         count = {}
@@ -51,6 +37,20 @@ class Bioinformatics(object):
             for j in range(k):
                 profileMatrix[symbol][j]=countMatrix[symbol][j]/totatDivCount
         return profileMatrix
+
+    def count(self, motifs):
+        k = len(motifs[0])
+        count = {}
+        for symbol in "ACGT":
+            count[symbol] = []
+            for j in range(k):
+                count[symbol].append(0)
+        t = len(motifs)
+        for i in range(t):
+            for j in range(k):
+                symbol = motifs[i][j]
+                count[symbol][j] += 1
+        return count
 
     def consensus(self,motifs):
         consensusString = ""
@@ -127,11 +127,11 @@ class Bioinformatics(object):
                 bestMotifs = motifs
         return bestMotifs
 
-    def motif(self, profileMatrix, dna):
-        mostProbable4mer = []
+    def motif(self, profileMatrix, dna,k=4):
+        mostProbableKmerDna = []
         for row in dna:
-            mostProbable4mer.append(self.mostProbableKmer(row,4,profileMatrix))
-        return mostProbable4mer
+            mostProbableKmerDna.append(self.mostProbableKmer(row,k,profileMatrix))
+        return mostProbableKmerDna
 
     def randomMotifs(self,dna,k,t):
         randomizedMotifs=[]
@@ -143,10 +143,69 @@ class Bioinformatics(object):
                 randomizedMotifs.append(row[startNum-k:startNum])
         return randomizedMotifs
 
+    def randomizedMotifSearch(self, dna, k, t):
+        m = self.randomMotifs(dna, k, t)
+        bestMotifs = m
+        while True:
+            profile = self.profileWithPseudocounts(m)
+            m = self.motif(profile, dna, k)
+            if self.score(m) < self.score(bestMotifs):
+                bestMotifs = m
+            else:
+                return bestMotifs
+
+    def randomizedMotifSearchNtimes(self,dna,k,t,n):
+        m= self.randomMotifs(dna,k,t)
+        bestMotifs = m
+        for i in range(0,n):
+            m = self.randomizedMotifSearch(dna,k,t)
+            if self.score(m) < self.score(bestMotifs):
+                bestMotifs = m
+        return bestMotifs
+
+    def normalize(self,probabilities):
+        sum = 0
+        for element in probabilities.values():
+            sum += element
+        for element2 in probabilities.keys():
+            probabilities[element2]=probabilities[element2]/sum
+        return probabilities
+
+    def weightedDie(self,probabilities):
+        kmer = ''
+        number = random.uniform(0,1)
+        acum = 0
+        for element in probabilities.keys():
+            if number >= acum and number < acum + probabilities[element]:
+                kmer = element
+            acum += probabilities[element]
+        return kmer
+
+    def profileGeneratedString(self, Text, profile, k):
+        n = len(Text)
+        probabilities = {}
+        probabilities_normalized = {}
+        probabilities_weighted = {}
+        for i in range(0,n-k+1):
+            kmer = Text[i:i+k]
+            probabilities[kmer] = self.kmerProb(kmer,profile)
+        probabilities_normalized = self.normalize(probabilities)
+        probabilities_weighted = self.weightedDie(probabilities_normalized)
+        return probabilities_weighted
+
+
 
 def main():
 
     bio = Bioinformatics()
+    # probabilites = {'A': 0.1, 'C': 0.1, 'G': 0.1, 'T': 0.1}
+    # print(bio.normalize(probabilites))
+    # probabilites = {'A': 0.25, 'C': 0.25, 'G': 0.25, 'T': 0.25}
+    # print(bio.weightedDie(probabilites))
+    k = 2
+    Text = 'AAACCCAAACCC'
+    profile = {'A': [0.5, 0.1], 'C': [0.3, 0.2], 'G': [0.2, 0.4], 'T': [0.0, 0.3]}
+    print(bio.profileGeneratedString(Text,profile,k))
     # profile_matrix = [
     #     [0.2, 0.2, 0.0, 0.0, 0.0, 0.0, 0.9, 0.1, 0.1, 0.1, 0.3, 0.0],
     #     [0.1, 0.6, 0.0, 0.0, 0.0, 0.0, 0.0, 0.4, 0.1, 0.2, 0.4, 0.6],
@@ -233,12 +292,18 @@ def main():
     #     'TTCCGG')
     # print(bio.countWithPseudocounts(motifs))
     # print(bio.profileWithPseudocounts(motifs))
-    profileMAtrix= {'A': [0.8, 0.0, 0.0, 0.2], 'C': [0.0, 0.6, 0.2, 0.0], 'G': [0.2, 0.2, 0.8, 0.0],
-                        'T': [0.0, 0.2, 0.0, 0.8]}
-    dna = ['TTACCTTAAC', 'GATGTCTGTC', 'ACGGCGTTAG', 'CCCTAACGAG', 'CGTCAGAGGT']
+    # profileMAtrix= {'A': [0.8, 0.0, 0.0, 0.2], 'C': [0.0, 0.6, 0.2, 0.0], 'G': [0.2, 0.2, 0.8, 0.0],
+    #                     'T': [0.0, 0.2, 0.0, 0.8]}
+    # dna = ['TTACCTTAAC', 'GATGTCTGTC', 'ACGGCGTTAG', 'CCCTAACGAG', 'CGTCAGAGGT']
     #print(bio.motif(profileMAtrix,dna))
-    k = 3
-    t = 5
-    print(bio.randomMotifs(dna,k,t))
+    # k = 3
+    # t = 5
+    # print(bio.randomMotifs(dna,k,t))
+    # dna = ['CGCCCCTCTCGGGGGTGTTCAGTAAACGGCCA', 'GGGCGAGGTATGTGTAAGTGCCAAGGTGCCAG', 'TAGTACCGAGACCGAAAGAAGTATACAGGCGT',
+    #        'TAGATCAAGTTTCAGGTGCACGTCGGTGAACC', 'AATCCACCAGCTCCACGTGCAATGTTGGCCTA']
+    # k = 8
+    # t = 5
+    # print(bio.randomizedMotifSearchNtimes(dna,k,t,100))
+
 if __name__ == "__main__":
     main()
