@@ -28,7 +28,6 @@ class Bioinformatics(object):
     def MaxMap(self,freqMap):
         maximum = 0
         for element in freqMap:
-            #print(element + " " + str(freqMap[element]))
             if abs(freqMap[element]) > maximum:
                 maximum = abs(freqMap[element])
         return maximum
