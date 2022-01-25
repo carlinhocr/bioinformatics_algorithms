@@ -77,10 +77,6 @@ class Bioinformatics(object):
         for i in range(len(pattern)):
             symbol= pattern[i]
             for nucleo in nucleotides:
-                print (nucleo)
-                print (symbol)
-                print (symbol + pattern[i+1:])
-                print(pattern[0:i-1]+symbol)
                 if nucleo != symbol:
                     if i == 0:
                         neighbor = nucleo + pattern[i+1:]
@@ -91,7 +87,48 @@ class Bioinformatics(object):
                     neighborhood.append(neighbor)
         return neighborhood
 
+    def prefix(self,pattern):
+        if len(pattern)<=1:
+            return_value = ""
+        else:
+            return_value = pattern[:-1]
+        return return_value
 
+    def firstSymbol(self,pattern):
+        return_value = pattern[0]
+        return return_value
+
+    def sufix(self,pattern):
+        if len(pattern)<=1:
+            return_value = pattern
+        else:
+            return_value = pattern[1:]
+        return return_value
+
+    def neighbors(self,pattern,d):
+        neighborhood = []
+        suffixNeighbors = []
+        nucleotides = ["A","C","G","T"]
+        if d == 0:
+            return_value = [pattern]
+        else:
+            if len(pattern) == 1:
+                return_value = nucleotides
+            else:
+                suffixNeighbors = self.neighbors(self.sufix(pattern), d)
+                print ("suffix neighbors", suffixNeighbors)
+                for item in suffixNeighbors:
+                    print ("item", item)
+                    if self.hammingDistance(self.sufix(pattern),item) < d:
+                        for nucleo in nucleotides:
+                            print ("nucleo + item" + nucleo + item)
+                            neighborhood.append(nucleo + item)
+                    else:
+                        print ("first symbol", self.firstSymbol(pattern), "pattern", pattern)
+                        neighborhood.append(self.firstSymbol(pattern)+item)
+                        print("neighborhood", neighborhood)
+                return_value = neighborhood
+        return return_value
 
 
 #-------------------------------------------------------------------------------
@@ -121,7 +158,8 @@ def main():
     # pattern = "TGAGGC"
     # d=2
     # print(bio.approximatePatternCount(text,pattern,d))
-    print (bio.inmediateNeighbors("AAA"))
+    #print (bio.inmediateNeighbors("AA"))
+    print("resultado final",bio.neighbors("ACG",1))
 
 
 if __name__ == "__main__":
