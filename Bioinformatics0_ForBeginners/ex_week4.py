@@ -180,14 +180,6 @@ class Bioinformatics(object):
             probabilities[element2]=probabilities[element2]/sum
         return probabilities
 
-    def normalize(self,probabilities):
-        sum = 0
-        for element in probabilities.values():
-            sum += element
-        for element2 in probabilities.keys():
-            probabilities[element2]=probabilities[element2]/sum
-        return probabilities
-
     def weightedDie(self,probabilities):
         kmer = ''
         number = random.uniform(0,1)
