@@ -2,6 +2,34 @@ class Bioinformatics(object):
     def __init__(self):
         pass
 
+    def reverse_v2(self,Pattern):
+        return Pattern[::-1]
+
+    def reverse(self,Pattern):
+        reverso = ""
+        for i in range(len(Pattern) - 1, -1, -1):  # voy hasta el menos 1 para    que range incliuya al cero
+            reverso += Pattern[i]
+        return reverso
+
+    def complement(self,Pattern):
+        complemento = ""
+        for i in range(0, len(Pattern), 1):
+            if Pattern[i] == "A":
+                lc = "T"
+            elif Pattern[i] == "T":
+                lc = "A"
+            elif Pattern[i] == "G":
+                lc = "C"
+            elif Pattern[i] == "C":
+                lc = "G"
+            complemento += lc
+        return complemento
+
+    def reverseComplement(self,Pattern):
+        Pattern = self.reverse_v2(Pattern)
+        Pattern = self.complement(Pattern)
+        return Pattern
+
     def hammingDistance(self,p,q):
         if len(p) >= len(q):
             mayor = p
@@ -116,19 +144,82 @@ class Bioinformatics(object):
                 return_value = nucleotides
             else:
                 suffixNeighbors = self.neighbors(self.sufix(pattern), d)
-                print ("suffix neighbors", suffixNeighbors)
                 for item in suffixNeighbors:
-                    print ("item", item)
                     if self.hammingDistance(self.sufix(pattern),item) < d:
                         for nucleo in nucleotides:
-                            print ("nucleo + item" + nucleo + item)
                             neighborhood.append(nucleo + item)
                     else:
-                        print ("first symbol", self.firstSymbol(pattern), "pattern", pattern)
                         neighborhood.append(self.firstSymbol(pattern)+item)
-                        print("neighborhood", neighborhood)
                 return_value = neighborhood
+        return_value.sort()
         return return_value
+
+    def iterativeNeighbors(self,pattern,d):
+        neighborhood = [pattern]
+        result = []
+        if d == 0:
+            pass
+        else:
+            for j in range(1,d+1):
+                for neighbor in self.iterativeNeighbors(pattern,j-1):
+                    neighborhood = neighborhood + self.inmediateNeighbors(neighbor)
+        for element in neighborhood:
+            if element not in result:
+                result.append(element)
+        result.sort()
+        return result
+
+    def frequentWordsWithMismatches(self,text,k,d):
+        patterns = []
+        freqMap = {}
+        n = len(text)
+        for i in range(n-k+1):
+            pattern = text[i:i+k]
+            neighborhood = self.neighbors(pattern,d)
+            for j in range (len(neighborhood)-1):
+                neighbor = neighborhood[j]
+                if neighbor not in freqMap.keys():
+                    freqMap[neighbor] = 1
+                else:
+                    freqMap[neighbor] +=1
+        m = max(freqMap.values())
+        for item in freqMap.keys():
+            if freqMap[item] == m:
+                patterns.append(item)
+        return patterns
+
+    def frequentWordsWithMismatchesAndReverseComplements(self,text,k,d):
+        patterns = []
+        freqMap = {}
+        n = len(text)
+        for i in range(n-k+1):
+            pattern = text[i:i+k]
+            neighborhood = self.neighbors(pattern,d)
+            for j in range (len(neighborhood)-1):
+                neighbor = neighborhood[j]
+                if neighbor not in freqMap.keys():
+                    freqMap[neighbor] = 1
+                else:
+                    freqMap[neighbor] +=1
+        count = 0
+        for item in freqMap.keys(): # finding the max of item + reverser complement
+            itemReverseComplement = self.reverseComplement(item)
+            if itemReverseComplement in freqMap.keys():
+                sum_item = freqMap[item] + freqMap[itemReverseComplement]
+            else:
+                sum_item = freqMap[item]
+            if sum_item > count:
+                count = sum_item
+        for item in freqMap.keys(): # finding the max items
+            itemReverseComplement = self.reverseComplement(item)
+            if itemReverseComplement in freqMap.keys():
+                sum_item = freqMap[item] + freqMap[itemReverseComplement]
+            else:
+                sum_item = freqMap[item]
+            if sum_item == count:
+                patterns.append(item)
+        return(patterns)
+
 
 
 #-------------------------------------------------------------------------------
@@ -159,7 +250,20 @@ def main():
     # d=2
     # print(bio.approximatePatternCount(text,pattern,d))
     #print (bio.inmediateNeighbors("AA"))
-    print("resultado final",bio.neighbors("ACG",1))
+    # pattern = "GTGCATCC"
+    # print("resultado final",bio.neighbors(pattern,2))
+    # print("resultado final",bio.iterativeNeighbors(pattern,2))
+    # text = "GTTAACGATGATGAACGATGATGGTTGTTAACGAACGGTTAACGATGCCCGTTATGATGCTGGCTGGATGCCCATGATGAACGCTGGCTGGAACGAACGGTTATGCCCATGAACGAACGCTGGCCCAACGAACGCTGGCTGGCCCCTGGAACGGTTAACGATGCTGGATGGTTGTTGTTCTGGCTGGATGCCCCTGGCCCCTGGAACGAACGATGATGCTGGAACGCCCATGGTTGTTGTTCCCATGATGCTGGAACGCCCCTGGATGAACGCTGGAACGATGGTTATGATGCTGGCTGGATGATGGTTCTGGCTGGAACGCCCAACGAACGCTGGAACGAACGCTGGCCCCCCGTTATG"
+    # k = 5
+    # d = 3
+    # print(bio.frequentWordsWithMismatches(text,k,d))
+    text = "GAGAACGCAACGGACAACGCAGAACGGAGATGCAGCTGTGGCGCTGTGGAACGGAACGACGTGTGCAGACAGAACGTGGAGCCAACGCAGCTGCACAACGACGGACATGGCCATGCAACGCACAACGGAACGTGACGGAGACAGATGACGGAGACAACGGCGATGGAGATGCATGGCCAACGACGTGGCGCCAGCGAGCACGACGTGGAGAACGGATG"
+    k = 6
+    d = 3
+    text = "ACGTTGCATGTCGCATGATGCATGAGAGCT"
+    k = 4
+    d = 1
+    print(bio.frequentWordsWithMismatchesAndReverseComplements(text,k,d))
 
 
 if __name__ == "__main__":

@@ -33,41 +33,41 @@ class Bioinformatics(object):
             freq[Pattern] += 1
         return freq
 
-def Reverse_v2(Pattern):
-    return Pattern[::-1]
+    def Reverse_v2(Pattern):
+        return Pattern[::-1]
 
-def Reverse(Pattern):
-    reverso = ""
-    for i in range(len(Pattern)-1,-1,-1): #voy hasta el menos 1 para    que range incliuya al cero
-        reverso += Pattern[i]
-    return reverso
+    def Reverse(Pattern):
+        reverso = ""
+        for i in range(len(Pattern)-1,-1,-1): #voy hasta el menos 1 para    que range incliuya al cero
+            reverso += Pattern[i]
+        return reverso
 
-def Complement(Pattern):
-    complemento = ""
-    for i in range(0,len(Pattern),1):
-        if Pattern [i] == "A":
-            lc = "T"
-        elif Pattern [i] == "T":
-            lc = "A"
-        elif Pattern [i] == "G":
-            lc = "C"
-        elif Pattern [i] == "C":
-            lc = "G"
-        complemento += lc
-    return complemento
+    def Complement(Pattern):
+        complemento = ""
+        for i in range(0,len(Pattern),1):
+            if Pattern [i] == "A":
+                lc = "T"
+            elif Pattern [i] == "T":
+                lc = "A"
+            elif Pattern [i] == "G":
+                lc = "C"
+            elif Pattern [i] == "C":
+                lc = "G"
+            complemento += lc
+        return complemento
 
-def ReverseComplement(Pattern):
-    Pattern = Reverse(Pattern)
-    Pattern = Complement(Pattern)
-    return Pattern
+    def ReverseComplement(Pattern):
+        Pattern = Reverse(Pattern)
+        Pattern = Complement(Pattern)
+        return Pattern
 
-def PatternMatching(Pattern, Genome):
-    positions = [] # output variable
-    for i in range(0,(len(Genome)-len(Pattern))+1):
-        subtext = Genome[i:len(Pattern)+i]
-        if subtext == Pattern:
-            positions.append(i)
-    return positions
+    def PatternMatching(Pattern, Genome):
+        positions = [] # output variable
+        for i in range(0,(len(Genome)-len(Pattern))+1):
+            subtext = Genome[i:len(Pattern)+i]
+            if subtext == Pattern:
+                positions.append(i)
+        return positions
 
 def main():
 
