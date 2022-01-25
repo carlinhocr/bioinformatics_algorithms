@@ -76,7 +76,6 @@ class Bioinformatics(object):
         positions =[]
         skew = self.skewArray_v2(Genome)
         min_skew = min(skew)
-        print (min_skew)
         for i in range (0,len(skew)):
             if skew[i] == min_skew:
                 positions.append(i)
@@ -220,6 +219,19 @@ class Bioinformatics(object):
                 patterns.append(item)
         return(patterns)
 
+    def findSalmonellaOri(self):
+        with open('Salmonella_enterica.txt', 'r') as fileSalmonella:
+            text = fileSalmonella.read().replace('\n', '')
+        minimum_skew = self.MinimumSkew(text)[0]
+        print ("minimum skew ",minimum_skew)
+        oriWindow_start = minimum_skew-500
+        oriWindow_end = minimum_skew+500
+        oriwindowText = text[oriWindow_start:oriWindow_end]
+        d = 1
+        k = 9
+        kmers = self.frequentWordsWithMismatchesAndReverseComplements(oriwindowText,k,d)
+        return(kmers)
+
 
 
 #-------------------------------------------------------------------------------
@@ -257,14 +269,14 @@ def main():
     # k = 5
     # d = 3
     # print(bio.frequentWordsWithMismatches(text,k,d))
-    text = "GAGAACGCAACGGACAACGCAGAACGGAGATGCAGCTGTGGCGCTGTGGAACGGAACGACGTGTGCAGACAGAACGTGGAGCCAACGCAGCTGCACAACGACGGACATGGCCATGCAACGCACAACGGAACGTGACGGAGACAGATGACGGAGACAACGGCGATGGAGATGCATGGCCAACGACGTGGCGCCAGCGAGCACGACGTGGAGAACGGATG"
-    k = 6
-    d = 3
-    text = "ACGTTGCATGTCGCATGATGCATGAGAGCT"
-    k = 4
-    d = 1
-    print(bio.frequentWordsWithMismatchesAndReverseComplements(text,k,d))
-
+    # text = "GAGAACGCAACGGACAACGCAGAACGGAGATGCAGCTGTGGCGCTGTGGAACGGAACGACGTGTGCAGACAGAACGTGGAGCCAACGCAGCTGCACAACGACGGACATGGCCATGCAACGCACAACGGAACGTGACGGAGACAGATGACGGAGACAACGGCGATGGAGATGCATGGCCAACGACGTGGCGCCAGCGAGCACGACGTGGAGAACGGATG"
+    # k = 6
+    # d = 3
+    # text = "ACGTTGCATGTCGCATGATGCATGAGAGCT"
+    # k = 4
+    # d = 1
+    # print(bio.frequentWordsWithMismatchesAndReverseComplements(text,k,d))
+    print(bio.findSalmonellaOri())
 
 if __name__ == "__main__":
     main()
