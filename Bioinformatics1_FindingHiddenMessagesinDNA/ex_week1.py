@@ -1,6 +1,48 @@
+
+
+
 class Bioinformatics(object):
     def __init__(self):
         pass
+
+    def patternToNumber (self,pattern):
+        if pattern == "":
+            return_value = 0
+        else:
+            symbol = self.lastSymbol(pattern)
+            prefix = self.prefix(pattern)
+            return_value = 4 * self.patternToNumber(prefix) + self.symbolToNumber(symbol)
+        return return_value
+
+    def lastSymbol(self,pattern):
+        return_value = pattern[-1]
+        return return_value
+
+    def prefix(self,pattern):
+        if len(pattern)<=1:
+            return_value = ""
+        else:
+            return_value = pattern[:-1]
+        return return_value
+
+    def symbolToNumber(self,symbol):
+        print(len(symbol))
+        print(symbol)
+        if len(symbol) == 1:
+            if symbol.upper() == "A":
+                return_value = 0
+            elif symbol.upper() == "C":
+                return_value = 1
+            elif symbol.upper() == "G":
+                return_value = 2
+            elif symbol.upper() == "T":
+                return_value = 3
+        else:
+            return_value=5000000000
+        return return_value
+
+
+
 
     def patternCount(self, text, pattern):
         count = 0
@@ -173,12 +215,13 @@ def main():
     # k = 5
     # l = 50
     # t = 4
-    with open('E_coli.txt','r') as fileEcoli:
-        text = fileEcoli.read()
-    k = 9
-    l = 500
-    t = 3
-    print(bio.findClumpsCount(text,k,l,t))
+    # with open('E_coli.txt','r') as fileEcoli:
+    #     text = fileEcoli.read()
+    # k = 9
+    # l = 500
+    # t = 3
+    # print(bio.findClumpsCount(text,k,l,t))
+    print(bio.patternToNumber("agt"))
 
 
 
