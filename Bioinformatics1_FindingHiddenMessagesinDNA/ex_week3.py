@@ -7,6 +7,10 @@ class Bioinformatics(object):
     def __init__(self):
         pass
 
+    def cloningList(li1):
+        li_copy = li1[:]
+        return li_copy
+
     def findAminoAcidFromCodon(self,codons):
         codon_full = {
             'UUU': 'Phe',
@@ -102,6 +106,7 @@ class Bioinformatics(object):
             actualCodon = codons[i:i+3]
             aminoAcid += codon_three_to_one [codon_full[codons[i:i+3]]]
         return aminoAcid
+
 
     def entropyCalc2(self,profile):
         entropy_matrix = 0.0
@@ -223,13 +228,136 @@ class Bioinformatics(object):
             if self.score(motifs) < self.score(bestMotifs):
                 bestMotifs = motifs
         return bestMotifs
+#------------------------------------------------------
 
 
+    def probabiltyKmers(self, k, strechesArrays, bases):
+        likelihood = 1 / (4 ** k)  # number of nucleotides x kmer * each nucleitide acgt if they are all equally probable
+        sequences = bases - k + 1  # number of nucleotides of lenght k in bases number of nucloetides
+        oneStrechProbability = sequences * likelihood
+        allStrechesProbability = oneStrechProbability * strechesArrays
+        print(allStrechesProbability)
+        return allStrechesProbability
+
+
+    def inmediateNeighbors(self,pattern):
+        neighborhood = []
+        neighborhood.append(pattern)
+        nucleotides = ["A","C","G","T"]
+        for i in range(len(pattern)):
+            symbol= pattern[i]
+            for nucleo in nucleotides:
+                if nucleo != symbol:
+                    if i == 0:
+                        neighbor = nucleo + pattern[i+1:]
+                    elif i == len(pattern)-1:
+                        neighbor = pattern[0:i]+nucleo
+                    else:
+                        neighbor = pattern[0:i]+nucleo+pattern[i+1:]
+                    neighborhood.append(neighbor)
+        return neighborhood
+
+    def iterativeNeighbors(self,pattern,d):
+        neighborhood = [pattern]
+        result = []
+        if d == 0:
+            pass
+        else:
+            for j in range(1,d+1):
+                for neighbor in self.iterativeNeighbors(pattern,j-1):
+                    neighborhood = neighborhood + self.inmediateNeighbors(neighbor)
+        for element in neighborhood:
+            if element not in result:
+                result.append(element)
+        result.sort()
+        return result
+
+    def hammingDistance(self,p,q):
+        if len(p) >= len(q):
+            mayor = p
+            menor = q
+        else:
+            mayor = q
+            menor = p
+        count = 0
+        for i in range (0,len(menor)):
+            if p[i] != q[i]:
+                count += 1
+        count += len(mayor)-len(menor)
+        return count
+
+    def motifEnumeration(self,dna,k,d):
+        patterns = []
+        encontrado = {}
+        patternNeighboors = {}
+        for dna_string in dna:
+            n = len(dna_string)
+            for i in range(n-k+1):
+                pattern = dna_string[i:i+k]
+                patternNeighboors[pattern] = self.iterativeNeighbors(pattern,d)
+                encontrado[pattern]=[]
+                for patternNeig in patternNeighboors[pattern]:
+                    count = 0
+                    for dna_string_2 in dna:
+                        for j in range(n-k+1):
+                            distance = self.hammingDistance(patternNeig,dna_string_2[j:j+k])
+                            if distance<=d:
+                                count += 1
+                                break # so I only count once per dna
+                    if count >= len(dna):
+                        patterns.append(patternNeig)
+        return list(dict.fromkeys(patterns))
+
+    def maximumScore(self,t,k):
+        nucloetides ="ACGT"
+        maximumRights = math.ceil(t/len(nucloetides)) # rounds to the next integer
+        print (maximumRights)
+        maximunMismatchesperColumn = t - maximumRights
+        totalMistmatechs = maximunMismatchesperColumn * k
+        print(totalMistmatechs)
 
 
 def main():
 
     bio = Bioinformatics()
+    #bio.probabiltyKmers(9,500,1000)
+    # dna = [
+    #     "ATTTGGC",
+    #     "TGCCTTA",
+    #     "CGGTATC",
+    #     "GAAAATT",
+    # ]
+    # k=3
+    # d=1
+    # dna = [
+    #     "TGATGTTCACCACTAGCTCAAAGCT",
+    #     "TGAAAGCCGATCACTTGATAAGCGA",
+    #     "TAAGCCGTTGTGATTCGTAATTATC",
+    #     "CGGTCTGATAACAGTCGTCTAATAA",
+    #     "TGATTGAGATCATAGAGTATACCCA",
+    #     "TGTGCCCTGATGATATACCGGTAAA",
+    # ]
+    # k=5
+    # d=1
+    # print(bio.motifEnumeration(dna,k,d))
+    bio.maximumScore(10,15)
+
+    Motifs = [
+        "TCGGGGGTTTTT",
+        "CCGGTGACTTAC",
+        "ACGGGGATTTTC",
+        "TTGGGGACTTTT",
+        "AAGGGGACTTCC",
+        "TTGGGGACTTCC",
+        "TCGGGGATTCAT",
+        "TCGGGGATTCCT",
+        "TAGGGGAACTAC",
+        "TCGGGTATAACC"
+    ]
+
+
+
+
     # profile_matrix = [
     #     [0.2, 0.2, 0.0, 0.0, 0.0, 0.0, 0.9, 0.1, 0.1, 0.1, 0.3, 0.0],
     #     [0.1, 0.6, 0.0, 0.0, 0.0, 0.0, 0.0, 0.4, 0.1, 0.2, 0.4, 0.6],
