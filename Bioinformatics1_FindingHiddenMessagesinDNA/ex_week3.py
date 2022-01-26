@@ -231,6 +231,23 @@ class Bioinformatics(object):
 #------------------------------------------------------
 
 
+    def profileAsList(self,motifs):
+        countMatrix = self.count(motifs)
+        profileMatrix = {}
+        k = len(motifs[0]) # number of columns
+        t = len(motifs) # number of rows
+        for symbol in "ACGT":
+            profileMatrix[symbol]=[]
+            for j in range(k):
+                profileMatrix[symbol].append(0)
+        for symbol in "ACGT":
+            for j in range(k):
+                profileMatrix[symbol][j]=countMatrix[symbol][j]/t
+        profileMatrixList = []
+        for numbers in profileMatrix.values():
+            profileMatrixList.append(numbers)
+        return profileMatrixList
+
     def probabiltyKmers(self, k, strechesArrays, bases):
         likelihood = 1 / (4 ** k)  # number of nucleotides x kmer * each nucleitide acgt if they are all equally probable
         sequences = bases - k + 1  # number of nucleotides of lenght k in bases number of nucloetides
@@ -340,9 +357,9 @@ def main():
     # k=5
     # d=1
     # print(bio.motifEnumeration(dna,k,d))
-    bio.maximumScore(10,15)
+    #bio.maximumScore(10,15)
 
-    Motifs = [
+    motifs = [
         "TCGGGGGTTTTT",
         "CCGGTGACTTAC",
         "ACGGGGATTTTC",
@@ -354,7 +371,10 @@ def main():
         "TAGGGGAACTAC",
         "TCGGGTATAACC"
     ]
-
+    profileMAtrix = bio.profileAsList(motifs)
+    print (profileMAtrix)
+    entropy = bio.entropyCalc(profileMAtrix)
+    print(entropy)
 
 
 
