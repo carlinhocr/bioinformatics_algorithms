@@ -233,16 +233,21 @@ class Bioinformatics(object):
         return(kmers)
 
     def hanoi(self,n,startPeg=1,destinationPeg=3):
+        self.hanoiNumberOfMoves = 0
+        self.hanoiRecursive(n,startPeg,destinationPeg)
+        print("Total Moves", self.hanoiNumberOfMoves)
+        return self.hanoiNumberOfMoves
+
+    def hanoiRecursive(self,n,startPeg=1,destinationPeg=3):
         if n == 1:
             print("Move Top disk from",startPeg," to",destinationPeg)
             self.hanoiNumberOfMoves +=1
-            print("Total Moves",self.hanoiNumberOfMoves)
         else:
             transitPeg = 6 - startPeg - destinationPeg
-            self.hanoi(n-1,startPeg,transitPeg)
+            self.hanoiRecursive(n-1,startPeg,transitPeg)
             print("Move Top disk from", startPeg, " to", destinationPeg)
             self.hanoiNumberOfMoves += 1
-            self.hanoi(n-1,transitPeg,destinationPeg)
+            self.hanoiRecursive(n-1,transitPeg,destinationPeg)
         return
 
 #-------------------------------------------------------------------------------
