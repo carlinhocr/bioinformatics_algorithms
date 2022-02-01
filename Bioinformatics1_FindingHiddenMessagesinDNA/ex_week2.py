@@ -1,6 +1,6 @@
 class Bioinformatics(object):
     def __init__(self):
-        pass
+        self.hanoiNumberOfMoves = 0
 
     def reverse_v2(self,Pattern):
         return Pattern[::-1]
@@ -232,7 +232,18 @@ class Bioinformatics(object):
         kmers = self.frequentWordsWithMismatchesAndReverseComplements(oriwindowText,k,d)
         return(kmers)
 
-
+    def hanoi(self,n,startPeg=1,destinationPeg=3):
+        if n == 1:
+            print("Move Top disk from",startPeg," to",destinationPeg)
+            self.hanoiNumberOfMoves +=1
+            print("Total Moves",self.hanoiNumberOfMoves)
+        else:
+            transitPeg = 6 - startPeg - destinationPeg
+            self.hanoi(n-1,startPeg,transitPeg)
+            print("Move Top disk from", startPeg, " to", destinationPeg)
+            self.hanoiNumberOfMoves += 1
+            self.hanoi(n-1,transitPeg,destinationPeg)
+        return
 
 #-------------------------------------------------------------------------------
 
@@ -240,6 +251,7 @@ class Bioinformatics(object):
 def main():
 
     bio = Bioinformatics()
+    bio.hanoi(4)
     # genome = "GAGCCACCGCGATA"
     # print(bio.skewArray_v2(genome).values())
     # with open('dataset_7_10.txt','r') as file7_10:
@@ -276,7 +288,7 @@ def main():
     # k = 4
     # d = 1
     # print(bio.frequentWordsWithMismatchesAndReverseComplements(text,k,d))
-    print(bio.findSalmonellaOri())
+    # print(bio.findSalmonellaOri())
 
 if __name__ == "__main__":
     main()
