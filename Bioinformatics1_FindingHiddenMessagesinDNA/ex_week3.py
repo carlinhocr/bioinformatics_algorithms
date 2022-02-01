@@ -333,10 +333,104 @@ class Bioinformatics(object):
         totalMistmatechs = maximunMismatchesperColumn * k
         print(totalMistmatechs)
 
+    def distancePatternAndStrings(self,pattern,dna):
+        k = len(pattern)
+        distance = 0
+        for motif in dna:
+            hammingDistance = len(pattern)+len(motif) #just like making it a very big number
+            for i in range(len(motif)-k+1):
+                pattern2 = motif[i:i+k]
+                distancePatterns = self.hammingDistance(pattern,pattern2)
+                if hammingDistance > distancePatterns:
+                    hammingDistance = distancePatterns
+            distance += hammingDistance
+        return distance
+
+    def allStrings(self,k):
+        allStringsLenghtK = []
+        pattern =""
+        for i in range(k):
+            pattern += "A"
+        allStringsLenghtK = self.iterativeNeighbors(pattern,k)
+        return allStringsLenghtK
+
+    def medianString(self,dna,k):
+        median = ""
+        distance = k + len(dna[0]) # like settign distance to infinity or a maximum value you can use also sys.maxsize
+        patternNeighbours = self.allStrings(k)
+        for pattern in patternNeighbours:
+            distancePatternsDNA = self.distancePatternAndStrings(pattern, dna)
+            if distance > distancePatternsDNA:
+                distance = distancePatternsDNA
+                median = pattern
+        return median
+
+
 
 def main():
 
     bio = Bioinformatics()
+    #print(bio.allStrings(4))
+    # k = 3
+    # t = 5
+    # dna =["GGCGTTCAGGCA","AAGAATCAGTCA","CAAGGAGTTCGC","CACGTCAATCAC","CAATAATATTCG"]
+    filename = 'dataset_159_5.txt'
+    with open(filename, "r") as dataset:
+        data = []
+        for line in dataset:
+            data.append(line.strip())
+        k_string,t_string = data[0].split()
+        k = int(k_string)
+        t = int(t_string)
+        dna_sequences = data[1].strip().split() # several motifs
+    list = bio.greedyMotifSearch(dna_sequences,k,t)
+    for element in list:
+        print(element)
+    # filename = 'dataset_159_3.txt'
+
+    # with open(filename, "r") as dataset:
+    #     data = []
+    #     for line in dataset:
+    #         data.append(line.strip())
+    #     dna = data[0]
+    #     k = int(data[1])
+    #     raw_profile = data[2:]
+    #     bases = ['A', 'C', 'G', 'T']
+    #     prof = [list(map(float, raw_profile[i].split())) for i in range(len(raw_profile))]
+    #     prof_dict = dict(zip(bases, prof))
+    # print(bio.mostProbableKmer(dna,k,prof_dict))
+    # profile = {
+    #     'A': [0.25,0.289,0.25,0.224,0.276,0.224,0.303,0.316,0.289,0.197,0.276,0.237,0.224],
+    #     'C': [0.342,0.303,0.382,0.316,0.342,0.316,0.289,0.263,0.237,0.382,0.355,0.211,0.263],
+    #     'G': [0.197,0.197,0.197,0.158,0.158,0.237,0.132,0.289,0.263,0.224,0.197,0.276,0.263],
+    #     'T': [0.211,0.211,0.171,0.303,0.224,0.224,0.276,0.132,0.211,0.197,0.171,0.276,0.25]
+    # }
+    #
+    # dna = "AATAGACCGCGATCGAAGCCTATTATCTTCAGGGGAGCAATAAGGCTCCATGCCCTCCTTTATAATATGTACTCCCTATGAAAGCCTTGGACCAACCACACGCCCCGTGCGCCCCGTTTACAGACTAGAAGGAGGTGACCTTTTCGGCCGATGTCTCAGGAGGCGGACACGCAATACCGGGGCTGAGCTTAAATGCGCAGATTAGTGTGGTTCGGATGGTGTTGAGCTGCTGGGTTTGGAGGGACTATGCCACCTGGGAGTGACTGAAGACACACCGACGTCCTCCGAGTGGGAACTACGCGTCAGATACCCCACATGTGATGGGACAGTTATTCGCCAAACACGCCGGCCGCGCCAGGAAACCCACCTCACTCGAAAGTAGGGTACTGCTCAAGCCCATGGCTATCTTTCATTCAGCTTCTACTTGTAATCCATTCGCCATATTTGGAATAACTCGCACGCGCAGGGGTGACGGCTGCGTTAAAGACGGTAGACATTCCATAGAATAAACTCAATCGAGTGCTATGCGGTAGGACGGGCCGTTTAGTGGACTCCCATATAATATGATATTTTAGTCGCTTCATGTTCCAACGAGCGTCAGCGCTGATAACTTCGCAGATACAACAGACAAGTCTGGGAAAAACATAGATGAAAGATATAGGTGTAACCGAATTCCCATGGCACGGCTAGTTTGGGTTTCCCATTGTCCGTTAAGCAATAGTCTAAGAGATTATCAATTTCCGGTGAGCCTGAGTTACCTTCCCATGTGCACCGAAAGGCTTAAACGCCCACCTTAGAAGGCGGGTCATATATGTGGAGGCCAATATGAATGCTAGGGCGGATCGGCCAATCATGCTACAGAGCTTAGTCCACATATGAGCTTAAGCGGTGGCTTATGCCCGCATCTGCACTCTAAGGGGCCGTCGCTACCAGACGGGTGGTTATTAGTGCTGTCGAGGTTTGCGGGTACAATACCAGAACCAGTTCCGGCTGTCGCCAA"
+    # k = 13
+    # print(bio.mostProbableKmer(dna,k,profile))
+    # profile = {
+    #
+    #     'A': [0.2, 0.2, 0.0, 0.0, 0.0, 0.0, 0.9, 0.1, 0.1, 0.1, 0.3, 0.0],
+    #     'C': [0.1, 0.6, 0.0, 0.0, 0.0, 0.0, 0.0, 0.4, 0.1, 0.2, 0.4, 0.6],
+    #     'G': [0.0, 0.0, 1.0, 1.0, 0.9, 0.9, 0.1, 0.0, 0.0, 0.0, 0.0, 0.0],
+    #     'T': [0.7, 0.2, 0.0, 0.0, 0.1, 0.1, 0.0, 0.5, 0.8, 0.7, 0.3, 0.4]
+    # }
+    # pattern = "TCGGGGATTTCC"
+    # print (bio.kmerProb(pattern,profile))
+    # with open("dataset_158_9.txt") as inp:
+    #     input_items = inp.read().strip().splitlines()
+    #     k_string = input_items[0].strip()
+    #     k = int(k_string)
+    #     dna_sequences = input_items[1].strip().split() # several motifs
+    # print(bio.medianString(dna_sequences,k))
+    # dna = ['TTACCTTAAC', 'GATATCTGTC', 'ACGGCGTTCG', 'CCCTAAAGAG', 'CGTCAGAGGT']
+    # pattern = "AAA"
+    # with open("dataset_5164_1.txt") as inp:
+    #     input_items = inp.read().strip().splitlines()
+    #     pattern = input_items[0].strip()
+    #     dna_sequences = input_items[1].strip().split() # several motifs
+    # print(bio.distancePatternAndStrings(pattern,dna_sequences))
     #bio.probabiltyKmers(9,500,1000)
     # dna = [
     #     "ATTTGGC",
@@ -359,22 +453,22 @@ def main():
     # print(bio.motifEnumeration(dna,k,d))
     #bio.maximumScore(10,15)
 
-    motifs = [
-        "TCGGGGGTTTTT",
-        "CCGGTGACTTAC",
-        "ACGGGGATTTTC",
-        "TTGGGGACTTTT",
-        "AAGGGGACTTCC",
-        "TTGGGGACTTCC",
-        "TCGGGGATTCAT",
-        "TCGGGGATTCCT",
-        "TAGGGGAACTAC",
-        "TCGGGTATAACC"
-    ]
-    profileMAtrix = bio.profileAsList(motifs)
-    print (profileMAtrix)
-    entropy = bio.entropyCalc(profileMAtrix)
-    print(entropy)
+    # motifs = [
+    #     "TCGGGGGTTTTT",
+    #     "CCGGTGACTTAC",
+    #     "ACGGGGATTTTC",
+    #     "TTGGGGACTTTT",
+    #     "AAGGGGACTTCC",
+    #     "TTGGGGACTTCC",
+    #     "TCGGGGATTCAT",
+    #     "TCGGGGATTCCT",
+    #     "TAGGGGAACTAC",
+    #     "TCGGGTATAACC"
+    # ]
+    # profileMAtrix = bio.profileAsList(motifs)
+    # print (profileMAtrix)
+    # entropy = bio.entropyCalc(profileMAtrix)
+    # print(entropy)
 
 
 
