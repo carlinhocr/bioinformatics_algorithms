@@ -201,6 +201,7 @@ class Bioinformatics(object):
         number_of_combinations = len(list)
         letter = []
         first_run = True
+        count_letter = 0
         for j in range(number_of_combinations):
             letter.append([])
         for x in range(len(list),0,-1):
@@ -210,7 +211,6 @@ class Bioinformatics(object):
                     letter[0].append(element)
                 print("corrida con letter en 0",letter)
                 first_run = False
-                count_letter = 0
             else:
                 print(len(list)-x)
                 for element in list[x-1]:

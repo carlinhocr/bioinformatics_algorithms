@@ -301,7 +301,7 @@ def main():
           'G': [0.1,0.3,1.0,0.1,0.5,0.0],
           'T': [0.3,0.1,0.0,0.4,0.5,0.0]
         }
-    print(bio.)
+
 
     # print(bio.kmerProb("AAGTTC",profileMatrix))
     # print(bio.findAminoAcidFromCodon("CCAAGUACAGAGAUUAAC"))
