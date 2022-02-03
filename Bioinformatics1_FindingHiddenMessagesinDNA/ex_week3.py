@@ -225,7 +225,7 @@ class Bioinformatics(object):
         print (list)
         return (letter[number_of_combinations-1])
 
-    def move_cursor(self,cur_item, cur_indexes, max_indexes, len_lista):
+    def move_cursor_ale(self,cur_item, cur_indexes, max_indexes, len_lista):
         found = False
         while not found:
             if cur_indexes[cur_item] < max_indexes[cur_item]:
@@ -238,7 +238,7 @@ class Bioinformatics(object):
                 cur_item -= 1
         return cur_item
 
-    def get_join(self,lista):
+    def get_join_ale(self,lista):
         len_lista = len(lista)
         cur_indexes = [0] * len_lista
         max_indexes = [len(subl) - 1 for subl in lista]
@@ -248,7 +248,7 @@ class Bioinformatics(object):
 
         while cur_indexes != max_indexes:
             final.append("".join([lista[i][cur_indexes[i]] for i in range(0, len_lista)]))
-            cur_item = self.move_cursor(cur_item, cur_indexes, max_indexes, len_lista)
+            cur_item = self.move_cursor_ale(cur_item, cur_indexes, max_indexes, len_lista)
 
         final.append("".join([lista[i][cur_indexes[i]] for i in range(0, len_lista)]))
         return final
@@ -661,7 +661,7 @@ def main():
     consensusList = bio.consensusFromProfile(profileMatrix)
     print(consensusList)
     print("Carlos",bio.buildString2(consensusList))
-    print ("Ale   ", bio.get_join(list(consensusList.values())))
+    print ("Ale   ", bio.get_join_ale(list(consensusList.values())))
 
     # print(bio.findAminoAcidFromCodon("CCAAGUACAGAGAUUAAC"))
     # print (bio.findAminoAcidFromCodon("CCCAGGACUGAGAUCAAU"))
