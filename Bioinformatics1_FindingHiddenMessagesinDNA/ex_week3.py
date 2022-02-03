@@ -183,6 +183,21 @@ class Bioinformatics(object):
             consensusString += frequentSymbol
         return consensusString
 
+    def consensusFromProfile(self,probMatrix):
+        numColumns = len(probMatrix["A"])
+        consensusMax={}
+        for i in range(numColumns):
+            localMax = 0
+            for symbol in "ACGT":
+                if probMatrix[symbol][i] > localMax:
+                    localMax = probMatrix[symbol][i]
+            consensusMax[i] = []
+            for symbol in "ACGT":
+                if probMatrix[symbol][i] == localMax:
+                    consensusMax[i] += symbol
+        return consensusMax
+
+
     def score(self,motifs):
         consensusString = self.consensus(motifs)
         countMatrix = self.count(motifs)
@@ -193,6 +208,7 @@ class Bioinformatics(object):
                 if symbol != consensusString[j]:
                     score += countMatrix[symbol][j]
         return score
+
 
     def kmerProb(self,kmer,profileMatrix):
         k = len(kmer)
@@ -365,7 +381,50 @@ class Bioinformatics(object):
                 median = pattern
         return median
 
+    def countWithPseudocounts(self,motifs):
+        k = len(motifs[0])
+        count = {}
+        for symbol in "ACGT":
+            count[symbol]=[]
+            for j in range(k):
+                count[symbol].append(1) # to create the lapalce pseudocoutns intead of initializing with zeroes I do it with ones
+        t = len(motifs)
+        for i in range(t):
+            for j in range(k):
+                symbol = motifs[i][j]
+                count[symbol][j] += 1
+        return count
 
+    def profileWithPseudocounts(self,motifs):
+        countMatrix = self.countWithPseudocounts(motifs)
+        profileMatrix = {}
+        k = len(motifs[0]) # number of columns
+        t = len(motifs) # number of rows
+        totatDivCount = 0 # laPlace
+        for symbol in "ACGT":
+            totatDivCount += countMatrix[symbol][0]
+            profileMatrix[symbol]=[]
+            for j in range(k):
+                profileMatrix[symbol].append(0)
+        for symbol in "ACGT":
+            for j in range(k):
+                profileMatrix[symbol][j]=countMatrix[symbol][j]/totatDivCount
+        return profileMatrix
+
+    def greedyMotifSearchWithPseudocounts(self,dna,k,t):
+        bestMotifs = []
+        for i in range (0,t):
+            bestMotifs.append(dna[i][0:k]) # dna es una lista de strings (dna1, dna2, etc) y t es el largo de esa lista, con esto agrego el primer kmer de cada dna1,dna2,... de la lista
+        n = len(dna[0])
+        for i in range (n-k+1):
+            motifs = [] # la lsita de strgins motifs
+            motifs.append(dna[0][i:i+k]) # agrego primero el promer kmer despues corro una letra y agrego otro
+            for j in range (1,t): #starting at 1 because i already have dna[0] with the sliding window
+                p =self.profileWithPseudocounts(motifs[0:j]) # create a profile matrix first of motif 0 then motifs 0 and 1 them motif 0,1 and 2
+                motifs.append(self.mostProbableKmer(dna[j],k,p))
+            if self.score(motifs) < self.score(bestMotifs):
+                bestMotifs = motifs
+        return bestMotifs
 
 def main():
 
@@ -374,18 +433,18 @@ def main():
     # k = 3
     # t = 5
     # dna =["GGCGTTCAGGCA","AAGAATCAGTCA","CAAGGAGTTCGC","CACGTCAATCAC","CAATAATATTCG"]
-    filename = 'dataset_159_5.txt'
-    with open(filename, "r") as dataset:
-        data = []
-        for line in dataset:
-            data.append(line.strip())
-        k_string,t_string = data[0].split()
-        k = int(k_string)
-        t = int(t_string)
-        dna_sequences = data[1].strip().split() # several motifs
-    list = bio.greedyMotifSearch(dna_sequences,k,t)
-    for element in list:
-        print(element)
+    # filename = 'dataset_160_9.txt'
+    # with open(filename, "r") as dataset:
+    #     data = []
+    #     for line in dataset:
+    #         data.append(line.strip())
+    #     k_string,t_string = data[0].split()
+    #     k = int(k_string)
+    #     t = int(t_string)
+    #     dna_sequences = data[1].strip().split() # several motifs
+    # list = bio.greedyMotifSearchWithPseudocounts(dna_sequences,k,t)
+    # for element in list:
+    #     print(element)
     # filename = 'dataset_159_3.txt'
 
     # with open(filename, "r") as dataset:
@@ -537,17 +596,67 @@ def main():
     # score = bio.score(bestMotifs)
     # print(bestMotifs)
     # print(score)
-    # profileMatrix =  {
-    #       'A': [0.4,0.3,0.0,0.1,0.0,0.9],
-    #       'C': [0.2,0.3,0.0,0.4,0.0,0.1],
-    #       'G': [0.1,0.3,1.0,0.1,0.5,0.0],
-    #       'T': [0.3,0.1,0.0,0.4,0.5,0.0]
-    #     }
-    # print(bio.kmerProb("AAGTTC",profileMatrix))
+    profileMatrix =  {
+          'A': [0.4,0.3,0.0,0.1,0.0,0.9],
+          'C': [0.2,0.3,0.0,0.4,0.0,0.1],
+          'G': [0.1,0.3,1.0,0.1,0.5,0.0],
+          'T': [0.3,0.1,0.0,0.4,0.5,0.0]
+        }
+    #print(bio.kmerProb("CAGTGA",profileMatrix))
+    print(bio.consensusFromProfile(profileMatrix))
     # print(bio.findAminoAcidFromCodon("CCAAGUACAGAGAUUAAC"))
     # print (bio.findAminoAcidFromCodon("CCCAGGACUGAGAUCAAU"))
     # print (bio.findAminoAcidFromCodon("CCGAGGACCGAAAUCAAC"))
     # print (bio.findAminoAcidFromCodon("CCCAGUACCGAAAUUAAC"))
-
+    # dna = ["CTCGATGAGTAGGAAAGTAGTTTCACTGGGCGAACCACCCCGGCGCTAATCCTAGTGCCC",
+    #        "GCAATCCTACCCGAGGCCACATATCAGTAGGAACTAGAACCACCACGGGTGGCTAGTTTC",
+    #        "GGTGTTGAACCACGGGGTTAGTTTCATCTATTGTAGGAATCGGCTTCAAATCCTACACAG"]
+    # print(bio.medianString(dna,7))
+    # a =[0.5,0,0,0.5]
+    # b = [0.25,0.25,0.25,0.25]
+    # c=[0,0,0,1]
+    # d=[0.25,0,0.5,0.25]
+    # print(bio.entropyCalcColumn(a), "A")
+    # print(bio.entropyCalcColumn(b), "B")
+    # print(bio.entropyCalcColumn(c), "C")
+    # print(bio.entropyCalcColumn(d), "D")
+    # motifs = ["AAGAGA","AAGCGA","AAGCGA","ACGCGA","CCGCGA","CCGGTA","GGGTTA","TGGTTA","TGGTTA","TTGTTA"]
+    #
+    # Consider
+    # the
+    # following
+    # motif
+    # matrix:
+    #
+    # CTCGATGAGTAGGAAAGTAGTTTCACTGGGCGAACCACCCCGGCGCTAATCCTAGTGCCC
+    #
+    # GCAATCCTACCCGAGGCCACATATCAGTAGGAACTAGAACCACCACGGGTGGCTAGTTTC
+    #
+    # GGTGTTGAACCACGGGGTTAGTTTCATCTATTGTAGGAATCGGCTTCAAATCCTACACAG
+    #
+    # Which
+    # of
+    # the
+    # following
+    # 7 - mers is a
+    # median
+    # string
+    # for this motif matrix? (Select all that apply.)
+    #
+    # 2
+    # points
+    #
+    # TCTGAAG
+    #
+    # CGTGTAA
+    #
+    # GTAGGAA
+    #
+    # GATGAGT
+    #
+    # ATAACGG
+    #
+    # TAGTTTC
+    #print(bio.consensus(motifs))
 if __name__ == "__main__":
     main()

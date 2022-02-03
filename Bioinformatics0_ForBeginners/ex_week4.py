@@ -351,6 +351,12 @@ def main():
     # n = 100
     # print(bio.gibbsSampler(dna,k,t,n))
     # # print(bio.randomizedMotifSearchNtimes(dna,k,t,100))
+    # profileMatrix =  {
+    #       'A': [0.4,0.3,0.0,0.1,0.0,0.9],
+    #       'C': [0.2,0.3,0.0,0.4,0.0,0.1],
+    #       'G': [0.1,0.3,1.0,0.1,0.5,0.0],
+    #       'T': [0.3,0.1,0.0,0.4,0.5,0.0]
+    #     }
 
 if __name__ == "__main__":
     main()

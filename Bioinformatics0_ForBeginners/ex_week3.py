@@ -301,11 +301,13 @@ def main():
           'G': [0.1,0.3,1.0,0.1,0.5,0.0],
           'T': [0.3,0.1,0.0,0.4,0.5,0.0]
         }
-    print(bio.kmerProb("AAGTTC",profileMatrix))
-    print(bio.findAminoAcidFromCodon("CCAAGUACAGAGAUUAAC"))
-    print (bio.findAminoAcidFromCodon("CCCAGGACUGAGAUCAAU"))
-    print (bio.findAminoAcidFromCodon("CCGAGGACCGAAAUCAAC"))
-    print (bio.findAminoAcidFromCodon("CCCAGUACCGAAAUUAAC"))
+    print(bio.)
+
+    # print(bio.kmerProb("AAGTTC",profileMatrix))
+    # print(bio.findAminoAcidFromCodon("CCAAGUACAGAGAUUAAC"))
+    # print (bio.findAminoAcidFromCodon("CCCAGGACUGAGAUCAAU"))
+    # print (bio.findAminoAcidFromCodon("CCGAGGACCGAAAUCAAC"))
+    # print (bio.findAminoAcidFromCodon("CCCAGUACCGAAAUUAAC"))
 
 if __name__ == "__main__":
     main()
