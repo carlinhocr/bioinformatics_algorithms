@@ -197,6 +197,61 @@ class Bioinformatics(object):
                     consensusMax[i] += symbol
         return consensusMax
 
+    def buildString2(self,list):
+        number_of_combinations = len(list)
+        letter = []
+        first_run = True
+        for j in range(number_of_combinations):
+            letter.append([])
+        for x in range(len(list),0,-1):
+            #print(x)
+            if first_run == True:
+                for element in list[x-1]:
+                    letter[0].append(element)
+                print("corrida con letter en 0",letter)
+                first_run = False
+                count_letter = 0
+            else:
+                print(len(list)-x)
+                for element in list[x-1]:
+                    print ("elemento de la lista",element)
+                    for elementString in letter[count_letter]:
+                        print("elemento de los ya concatenados",elementString)
+                        print(element+elementString)
+                        letter[count_letter+1].append(element+elementString)
+                        print ("asi queda letter",letter)
+                count_letter += 1
+        print(letter[number_of_combinations-1])
+        print (list)
+        return (letter[number_of_combinations-1])
+
+    def move_cursor(self,cur_item, cur_indexes, max_indexes, len_lista):
+        found = False
+        while not found:
+            if cur_indexes[cur_item] < max_indexes[cur_item]:
+                cur_indexes[cur_item] += 1
+                for i in range(cur_item + 1, len_lista):
+                    cur_indexes[i] = 0
+                cur_item = len_lista - 1
+                found = True
+            else:
+                cur_item -= 1
+        return cur_item
+
+    def get_join(self,lista):
+        len_lista = len(lista)
+        cur_indexes = [0] * len_lista
+        max_indexes = [len(subl) - 1 for subl in lista]
+        cur_item = len_lista - 1
+
+        final = []
+
+        while cur_indexes != max_indexes:
+            final.append("".join([lista[i][cur_indexes[i]] for i in range(0, len_lista)]))
+            cur_item = self.move_cursor(cur_item, cur_indexes, max_indexes, len_lista)
+
+        final.append("".join([lista[i][cur_indexes[i]] for i in range(0, len_lista)]))
+        return final
 
     def score(self,motifs):
         consensusString = self.consensus(motifs)
@@ -603,7 +658,11 @@ def main():
           'T': [0.3,0.1,0.0,0.4,0.5,0.0]
         }
     #print(bio.kmerProb("CAGTGA",profileMatrix))
-    print(bio.consensusFromProfile(profileMatrix))
+    consensusList = bio.consensusFromProfile(profileMatrix)
+    print(consensusList)
+    print("Carlos",bio.buildString2(consensusList))
+    print ("Ale   ", bio.get_join(list(consensusList.values())))
+
     # print(bio.findAminoAcidFromCodon("CCAAGUACAGAGAUUAAC"))
     # print (bio.findAminoAcidFromCodon("CCCAGGACUGAGAUCAAU"))
     # print (bio.findAminoAcidFromCodon("CCGAGGACCGAAAUCAAC"))
