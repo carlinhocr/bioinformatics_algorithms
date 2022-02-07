@@ -197,33 +197,34 @@ class Bioinformatics(object):
                     consensusMax[i] += symbol
         return consensusMax
 
-    def buildString2(self,list):
-        number_of_combinations = len(list)
+
+    def stringListInStringList(self,listElements,listToSearch):
+        found = []
+        notFound = []
+        for element in listElements:
+            if element in listToSearch:
+                found.append(element)
+            else:
+                notFound.append(element)
+        return found, notFound
+
+    def buildString(self,list):
+        n = len(list)
         letter = []
         first_run = True
         count_letter = 0
-        for j in range(number_of_combinations):
-            letter.append([])
         for x in range(len(list),0,-1):
-            #print(x)
+            letter.append([]) # initialized letter
             if first_run == True:
                 for element in list[x-1]:
                     letter[0].append(element)
-                print("corrida con letter en 0",letter)
                 first_run = False
             else:
-                print(len(list)-x)
                 for element in list[x-1]:
-                    print ("elemento de la lista",element)
                     for elementString in letter[count_letter]:
-                        print("elemento de los ya concatenados",elementString)
-                        print(element+elementString)
                         letter[count_letter+1].append(element+elementString)
-                        print ("asi queda letter",letter)
                 count_letter += 1
-        print(letter[number_of_combinations-1])
-        print (list)
-        return (letter[number_of_combinations-1])
+        return (letter[n-1])
 
     def move_cursor_ale(self,cur_item, cur_indexes, max_indexes, len_lista):
         found = False
@@ -660,8 +661,13 @@ def main():
     #print(bio.kmerProb("CAGTGA",profileMatrix))
     consensusList = bio.consensusFromProfile(profileMatrix)
     print(consensusList)
-    print("Carlos",bio.buildString2(consensusList))
+    print("Carlos",bio.buildString(consensusList))
     print ("Ale   ", bio.get_join_ale(list(consensusList.values())))
+    totalList = bio.buildString(consensusList)
+    tofind =['AAGTGA', 'AAGTTA', 'ACGCGA','AATTGA', 'ATTTTA', 'TCGCGA']
+    found, notfound = bio.stringListInStringList(tofind,totalList)
+    print("Found: ",found)
+    print("Not Found", notfound)
 
     # print(bio.findAminoAcidFromCodon("CCAAGUACAGAGAUUAAC"))
     # print (bio.findAminoAcidFromCodon("CCCAGGACUGAGAUCAAU"))
