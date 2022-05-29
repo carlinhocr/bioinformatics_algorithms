@@ -1,5 +1,6 @@
 import math
 import random
+from scipy.stats import binom
 
 # comentario de test loco
 class Bioinformatics(object):
@@ -48,7 +49,7 @@ class Bioinformatics(object):
                 profileMatrix[symbol][j]=countMatrix[symbol][j]/totatDivCount
         return profileMatrix
 
-    def kmerProb(self,kmer,profileMatrix):
+    def kmerProb(self, kmer, profileMatrix):
         k = len(kmer)
         probability = 1
         for j in range(k):
@@ -57,14 +58,13 @@ class Bioinformatics(object):
         return probability
 
     def mostProbableKmer(self,dna,k,profileMatrix):
-        max = 0
-        maxKmer =dna[0:k] # return first kmer if probability for all is zero
-        totalLenght=len(dna)
-        for i in range(len(dna)-k+1):
+        maxProb = 0
+        maxKmer = dna[0:k]  # return first kmer if probability for all is zero
+        for i in range(len(dna)-k+1):  # total Length=len(dna)
             kmer = dna[i:i+k]
-            prob = self.kmerProb(kmer,profileMatrix)
-            if prob > max:
-                max = prob
+            prob = self.kmerProb(kmer, profileMatrix)
+            if prob > maxProb:
+                maxProb = prob
                 maxKmer = kmer
         return maxKmer
 
@@ -110,14 +110,54 @@ class Bioinformatics(object):
             else:
                 return bestMotifs
 
-    def randomizedMotifSearchNtimes(self,dna,k,t,n):
-        m= self.randomMotifs(dna,k,t)
-        bestMotifs = m
-        for i in range(0,n):
-            m = self.randomizedMotifSearch(dna,k,t)
+    def randomizedMotifSearchNTimes(self, dna, k, t, n):
+        m_initial = self.randomMotifs(dna, k, t)  # only to have an initial motif set
+        bestMotifs = m_initial
+        for i in range(0, n):
+            m = self.randomizedMotifSearch(dna, k, t)   # a full run of randomized motif search that finishes with a score that is not less than the last one
             if self.scorewithPseudocounts(m) < self.scorewithPseudocounts(bestMotifs):
                 bestMotifs = m[:]
         return bestMotifs
+
+    def probabilityAllKmersFoundNStrings(self, numberOfKmers, kmersLenght, nucleotidesLengh):
+        # probability of not capturing the  kmer in the first nucleotide string:
+        probNotFoundFirstNucleotide = (nucleotidesLengh - kmersLenght) / (nucleotidesLengh - kmersLenght + 1)
+        probAllKmersNotFound = pow(probNotFoundFirstNucleotide, numberOfKmers)
+        probAllKmersFound = 1 - probAllKmersNotFound
+        return probAllKmersFound
+
+    def probabilityOfAtLeast2Found(self, numberOfKmers, kmersLenght, nucleotidesLengh):
+        # This is a binomial probability question. Think about the fact that you're flipping a weighted coin 10 times and you
+        # want to calculate the probability of flipping heads at least two times. This is the same as the probability of NOT flipping heads either zero times or one time, which can be calculated as 1 - P(H=0) - P(H=1).
+        # There are 600 - 15 + 1 positions in a single string, of which a single one is correct. That suggests our coin is
+        # weighted such that the probability of heads is 1/586.
+        # The probability of zero heads, P(H=0), is what was calculated previously. That means the 10 coin flips all
+        # came up tails, at a probability of 585/586 each time.
+        # Now we have to calculate the probability of heads coming up only once. That is the probability of 9 tails and 1 head.
+        # BUT, that head flip can come in any order, of which there are 10 possible positions (10 choose 1 is simply 10).
+        # So after you multiply the independent probabilities (9 of the tails and one of the heads), you have to multiply
+        # that by the 'binomial coefficient', which in this case is 10 for the ten possible ways those flips can be ordered.
+        # This will give you P(H=1).
+        # Now we have P(H=0) and P(H=1), but we want the probability that this did NOT happen,
+        # so the full answer is 1 - P(H=0) - P(H=1).
+        # You
+        # can use scipy.stats module
+        # with cumulative distribution function in binom
+        # p(success) = 1 / 586
+        # number
+        # of
+        # trials = 10
+        # binom.cdf(1, 10, 1 / 586) is the
+        # probability
+        # of
+        # 1 or 0
+        # success
+        # event.
+        # from scipy.stats import binom
+        probOneFound = 1 / (nucleotidesLengh - kmersLenght + 1)
+        ProbabilityOneOrZeroEvents = 1 - binom.cdf(1, numberOfKmers, probOneFound)
+        return ProbabilityOneOrZeroEvents
+
 
 
 # ==============================
@@ -146,9 +186,6 @@ class Bioinformatics(object):
     #             symbol = motifs[i][j]
     #             count[symbol][j] += 1
     #     return count
-    #
-    #
-    #
     #
     # def greedyMotifSearch(self,dna,k,t):
     #     bestMotifs = []
@@ -253,150 +290,22 @@ class Bioinformatics(object):
 def main():
 
     bio = Bioinformatics()
-    # #bio.randomizedMotifSearch_exam()
-    # probabilities = {'A': 0.22, 'C': 0.54, 'G': 0.58, 'T': 0.36}
-    # print (bio.normalize(probabilities))
-    # probabilites = {'A': 0.1, 'C': 0.1, 'G': 0.1, 'T': 0.1}
-    # print(bio.normalize(probabilites))
-    # probabilites = {'A': 0.25, 'C': 0.25, 'G': 0.25, 'T': 0.25}
-    # print(bio.weightedDie(probabilites))
-    # k = 2
-    # Text = 'AAACCCAAACCC'
-    # profile = {'A': [0.5, 0.1], 'C': [0.3, 0.2], 'G': [0.2, 0.4], 'T': [0.0, 0.3]}
-    # print(bio.profileGeneratedString(Text,profile,k))
-    # profile_matrix = [
-    #     [0.2, 0.2, 0.0, 0.0, 0.0, 0.0, 0.9, 0.1, 0.1, 0.1, 0.3, 0.0],
-    #     [0.1, 0.6, 0.0, 0.0, 0.0, 0.0, 0.0, 0.4, 0.1, 0.2, 0.4, 0.6],
-    #     [0.0, 0.0, 1.0, 1.0, 0.9, 0.9, 0.1, 0.0, 0.0, 0.0, 0.0, 0.0],
-    #     [0.7, 0.2, 0.0, 0.0, 0.1, 0.1, 0.0, 0.5, 0.8, 0.7, 0.3, 0.4]
-    # ]
-    # column = [0.2, 0.6, 0.0, 0.2]
-    #print (bio.entropyCalcColumn(column))
-    #print (bio.entropyCalc(profile_matrix))
-    # motifs = ["AACGTA","CCCGTT","CACCTT","GGATTA","TTCCGG"]
-    # print (bio.count(motifs))
-    # print (bio.profile(motifs))
-    # print(bio.consensus(motifs))
-    # print(bio.score(motifs))
-    # kmer="TCGTGGATTTCC"
-    # kmer2 = "ACGGGGATTACC"
-    # profileMatrix = {"A":[0.2, 0.2, 0.0, 0.0, 0.0, 0.0, 0.9, 0.1, 0.1, 0.1, 0.3, 0.0],
-    #     "C":[0.1, 0.6, 0.0, 0.0, 0.0, 0.0, 0.0, 0.4, 0.1, 0.2, 0.4, 0.6],
-    #     "G":[0.0, 0.0, 1.0, 1.0, 0.9, 0.9, 0.1, 0.0, 0.0, 0.0, 0.0, 0.0],
-    #     "T":[0.7, 0.2, 0.0, 0.0, 0.1, 0.1, 0.0, 0.5, 0.8, 0.7, 0.3, 0.4]
-    # }
-    # print(bio.kmerProb(kmer2,profileMatrix))
-    # profileMatrix =  {
-    #       'A': [0.2, 0.2, 0.3, 0.2, 0.3],
-    #       'C': [0.4, 0.3, 0.1, 0.5, 0.1],
-    #       'G': [0.3, 0.3, 0.5, 0.2, 0.4],
-    #       'T': [0.1, 0.2, 0.1, 0.1, 0.2]
-    #     }
-    # A: 0.4,0.3,0.0,0.1,0.0,0.9
-    #
-    # C: 0.2,0.3,0.0,0.4,0.0,0.1
-    #
-    # G: 0.1,0.3,1.0,0.1,0.5,0.0
-    #
-    # T: 0.3,0.1,0.0,0.4,0.5,0.0
-    # dna = "ACCTGTTTATTGCCTAAGTTCCGAACAAACCCAATATAGCCCGAGGGCCT"
-    # k=5
-    # print(bio.mostProbableKmer(dna,k,profileMatrix))
-    # dna = [
-    #     "GGCGTTCAGGCA",
-    #     "AAGAATCAGTCA",
-    #     "CAAGGAGTTCGC",
-    #     "CACGTCAATCAC",
-    #     "CAATAATATTCG"
-    # ]
-    # k=3
-    # t=5
-    #
-    # dna =  [
-    # "GCGCCCCGCCCGGACAGCCATGCGCTAACCCTGGCTTCGATGGCGCCGGCTCAGTTAGGGCCGGAAGTCCCCAATGTGGCAGACCTTTCGCCCCTGGCGGACGAATGACCCCAGTGGCCGGGACTTCAGGCCCTATCGGAGGGCTCCGGCGCGGTGGTCGGATTTGTCTGTGGAGGTTACACCCCAATCGCAAGGATGCATTATGACCAGCGAGCTGAGCCTGGTCGCCACTGGAAAGGGGAGCAACATC",
-    # "CCGATCGGCATCACTATCGGTCCTGCGGCCGCCCATAGCGCTATATCCGGCTGGTGAAATCAATTGACAACCTTCGACTTTGAGGTGGCCTACGGCGAGGACAAGCCAGGCAAGCCAGCTGCCTCAACGCGCGCCAGTACGGGTCCATCGACCCGCGGCCCACGGGTCAAACGACCCTAGTGTTCGCTACGACGTGGTCGTACCTTCGGCAGCAGATCAGCAATAGCACCCCGACTCGAGGAGGATCCCG",
-    # "ACCGTCGATGTGCCCGGTCGCGCCGCGTCCACCTCGGTCATCGACCCCACGATGAGGACGCCATCGGCCGCGACCAAGCCCCGTGAAACTCTGACGGCGTGCTGGCCGGGCTGCGGCACCTGATCACCTTAGGGCACTTGGGCCACCACAACGGGCCGCCGGTCTCGACAGTGGCCACCACCACACAGGTGACTTCCGGCGGGACGTAAGTCCCTAACGCGTCGTTCCGCACGCGGTTAGCTTTGCTGCC",
-    # "GGGTCAGGTATATTTATCGCACACTTGGGCACATGACACACAAGCGCCAGAATCCCGGACCGAACCGAGCACCGTGGGTGGGCAGCCTCCATACAGCGATGACCTGATCGATCATCGGCCAGGGCGCCGGGCTTCCAACCGTGGCCGTCTCAGTACCCAGCCTCATTGACCCTTCGACGCATCCACTGCGCGTAAGTCGGCTCAACCCTTTCAAACCGCTGGATTACCGACCGCAGAAAGGGGGCAGGAC",
-    # "GTAGGTCAAACCGGGTGTACATACCCGCTCAATCGCCCAGCACTTCGGGCAGATCACCGGGTTTCCCCGGTATCACCAATACTGCCACCAAACACAGCAGGCGGGAAGGGGCGAAAGTCCCTTATCCGACAATAAAACTTCGCTTGTTCGACGCCCGGTTCACCCGATATGCACGGCGCCCAGCCATTCGTGACCGACGTCCCCAGCCCCAAGGCCGAACGACCCTAGGAGCCACGAGCAATTCACAGCG",
-    # "CCGCTGGCGACGCTGTTCGCCGGCAGCGTGCGTGACGACTTCGAGCTGCCCGACTACACCTGGTGACCACCGCCGACGGGCACCTCTCCGCCAGGTAGGCACGGTTTGTCGCCGGCAATGTGACCTTTGGGCGCGGTCTTGAGGACCTTCGGCCCCACCCACGAGGCCGCCGCCGGCCGATCGTATGACGTGCAATGTACGCCATAGGGTGCGTGTTACGGCGATTACCTGAAGGCGGCGGTGGTCCGGA",
-    # "GGCCAACTGCACCGCGCTCTTGATGACATCGGTGGTCACCATGGTGTCCGGCATGATCAACCTCCGCTGTTCGATATCACCCCGATCTTTCTGAACGGCGGTTGGCAGACAACAGGGTCAATGGTCCCCAAGTGGATCACCGACGGGCGCGGACAAATGGCCCGCGCTTCGGGGACTTCTGTCCCTAGCCCTGGCCACGATGGGCTGGTCGGATCAAAGGCATCCGTTTCCATCGATTAGGAGGCATCAA",
-    # "GTACATGTCCAGAGCGAGCCTCAGCTTCTGCGCAGCGACGGAAACTGCCACACTCAAAGCCTACTGGGCGCACGTGTGGCAACGAGTCGATCCACACGAAATGCCGCCGTTGGGCCGCGGACTAGCCGAATTTTCCGGGTGGTGACACAGCCCACATTTGGCATGGGACTTTCGGCCCTGTCCGCGTCCGTGTCGGCCAGACAAGCTTTGGGCATTGGCCACAATCGGGCCACAATCGAAAGCCGAGCAG",
-    # "GGCAGCTGTCGGCAACTGTAAGCCATTTCTGGGACTTTGCTGTGAAAAGCTGGGCGATGGTTGTGGACCTGGACGAGCCACCCGTGCGATAGGTGAGATTCATTCTCGCCCTGACGGGTTGCGTCTGTCATCGGTCGATAAGGACTAACGGCCCTCAGGTGGGGACCAACGCCCCTGGGAGATAGCGGTCCCCGCCAGTAACGTACCGCTGAACCGACGGGATGTATCCGCCCCAGCGAAGGAGACGGCG",
-    # "TCAGCACCATGACCGCCTGGCCACCAATCGCCCGTAACAAGCGGGACGTCCGCGACGACGCGTGCGCTAGCGCCGTGGCGGTGACAACGACCAGATATGGTCCGAGCACGCGGGCGAACCTCGTGTTCTGGCCTCGGCCAGTTGTGTAGAGCTCATCGCTGTCATCGAGCGATATCCGACCACTGATCCAAGTCGGGGGCTCTGGGGACCGAAGTCCCCGGGCTCGGAGCTATCGGACCTCACGATCACC"
-    # ]
-    # k=15
-    # t=10
-    # x=20
-    # n=100
-    # print(bio.gibbsSamplerRepeatXtimes(dna,k,t,n,x))
-    # print(bio.greedyMotifSearchWithPseudocounts(dna,k,t))
-    # bestMotifs=bio.greedyMotifSearch(dna,k,t)
-    # score = bio.score(bestMotifs)
-    # print(bestMotifs)
-    # print(score)
-    # profileMatrix =  {
-    #       'A': [0.4,0.3,0.0,0.1,0.0,0.9],
-    #       'C': [0.2,0.3,0.0,0.4,0.0,0.1],
-    #       'G': [0.1,0.3,1.0,0.1,0.5,0.0],
-    #       'T': [0.3,0.1,0.0,0.4,0.5,0.0]
-    #     }
-    # print(bio.kmerProb("AAGTTC",profileMatrix))
-    # print(bio.findAminoAcidFromCodon("CCAAGUACAGAGAUUAAC"))
-    # print (bio.findAminoAcidFromCodon("CCCAGGACUGAGAUCAAU"))
-    # print (bio.findAminoAcidFromCodon("CCGAGGACCGAAAUCAAC"))
-    # print (bio.findAminoAcidFromCodon("CCCAGUACCGAAAUUAAC"))
-    # motifs = (
-    #     'AACGTA',
-    #     'CCCGTT',
-    #     'CACCTT',
-    #     'GGATTA',
-    #     'TTCCGG')
-    # print(bio.countWithPseudocounts(motifs))
-    # print(bio.profileWithPseudocounts(motifs))
-    # profileMAtrix= {'A': [0.8, 0.0, 0.0, 0.2], 'C': [0.0, 0.6, 0.2, 0.0], 'G': [0.2, 0.2, 0.8, 0.0],
-    #                     'T': [0.0, 0.2, 0.0, 0.8]}
-    # dna = ['TTACCTTAAC', 'GATGTCTGTC', 'ACGGCGTTAG', 'CCCTAACGAG', 'CGTCAGAGGT']
-    #print(bio.motif(profileMAtrix,dna))
-    # k = 3
-    # t = 5
-    # print(bio.randomMotifs(dna,k,t))
-    # dna = ['CGCCCCTCTCGGGGGTGTTCAGTAAACGGCCA', 'GGGCGAGGTATGTGTAAGTGCCAAGGTGCCAG', 'TAGTACCGAGACCGAAAGAAGTATACAGGCGT',
-    #        'TAGATCAAGTTTCAGGTGCACGTCGGTGAACC', 'AATCCACCAGCTCCACGTGCAATGTTGGCCTA']
-    # k = 8
-    # t = 5
-    # n = 100
-    # print(bio.gibbsSampler(dna,k,t,n))
-    # # print(bio.randomizedMotifSearchNtimes(dna,k,t,100))
-    # profileMatrix =  {
-    #       'A': [0.4,0.3,0.0,0.1,0.0,0.9],
-    #       'C': [0.2,0.3,0.0,0.4,0.0,0.1],
-    #       'G': [0.1,0.3,1.0,0.1,0.5,0.0],
-    #       'T': [0.3,0.1,0.0,0.4,0.5,0.0]
-    #     }
+    # filename = 'dataset_161_5.txt'
+    # with open(filename, "r") as dataset:
+    #     data = []
+    #     for line in dataset:
+    #         data.append(line.strip())
+    #     k_string,t_string = data[0].split()
+    #     k = int(k_string)
+    #     t = int(t_string)
+    #     dna_sequences = data[1].strip().split() # several motifs
+    #     n = 1000
+    #     # print (dna_sequences,k,t,n)
+    #     list = bio.randomizedMotifSearchNTimes(dna_sequences,k,t,n)
+    #     print(*list) # separate the elements with one space only (using *
     # ---------------------------------------------------------------------------------------------------------------
-    # Exercise 1 Randomized motif search n time
-    # Debug Set
-    # dna = ['CGCCCCTCTCGGGGGTGTTCAGTAAACGGCCA', 'GGGCGAGGTATGTGTAAGTGCCAAGGTGCCAG', 'TAGTACCGAGACCGAAAGAAGTATACAGGCGT',
-    #        'TAGATCAAGTTTCAGGTGCACGTCGGTGAACC', 'AATCCACCAGCTCCACGTGCAATGTTGGCCTA']
-    # k = 8
-    # t = 5
-    # n = 1000
-    # print(bio.randomizedMotifSearchNtimes(dna,k,t,n))
-    #File real exercise set
-    filename = 'dataset_161_5.txt'
-    with open(filename, "r") as dataset:
-        data = []
-        for line in dataset:
-            data.append(line.strip())
-        k_string,t_string = data[0].split()
-        k = int(k_string)
-        t = int(t_string)
-        dna_sequences = data[1].strip().split() # several motifs
-        n = 1000
-        # print (dna_sequences,k,t,n)
-        list = bio.randomizedMotifSearchNtimes(dna_sequences,k,t,n)
-        print(*list) # separate the elements with one space only (using *
-    # ---------------------------------------------------------------------------------------------------------------
+    print(bio.probabilityAllKmersFoundNStrings(numberOfKmers=10,kmersLenght=15,nucleotidesLengh=600))
+    print(bio.probabilityOfAtLeast2Found(numberOfKmers=10, kmersLenght=15, nucleotidesLengh=600))
 
 if __name__ == "__main__":
     main()
